@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>Mini School Tools - علی سام</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align:center; background:#e8f0fe; }
+  .card { background:white; padding:20px; margin:15px auto; border-radius:12px; width:320px; box-shadow:0 4px 8px rgba(0,0,0,0.1);}
+  button { margin:5px 0; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; width:90%; }
+  button:hover { background:#0077ff; color:white; }
+  input, textarea { margin:5px 0; padding:8px; width:90%; border-radius:6px; border:1px solid #aaa; }
+  #timerDisplay, #finalRes, #randomRes, #avgRes { font-weight:bold; margin-top:10px; color:red; }
+  #splash { position:fixed; top:0; left:0; width:100%; height:100%; background:#1a73e8; color:white; display:flex; justify-content:center; align-items:center; font-size:24px; flex-direction:column; }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  ✨ ساخته علی سام مردی ✨
+</div>
+
+<h2>🎓 Mini School Tools</h2>
+
+<!-- حسابگر نمره -->
+<div class="card">
+  <h3>📊 حسابگر نمره نهایی</h3>
+  <input id="takalif" type="number" placeholder="تکالیف">
+  <input id="quiz" type="number" placeholder="کوییز">
+  <input id="exam" type="number" placeholder="امتحان">
+  <button onclick="calcFinal()">محاسبه</button>
+  <div id="finalRes"></div>
+</div>
+
+<!-- تایمر -->
+<div class="card">
+  <h3>⏱️ تایمر امتحان</h3>
+  <input id="minutes" type="number" placeholder="دقیقه">
+  <button onclick="startTimer()">شروع</button>
+  <div id="timerDisplay"></div>
+</div>
+
+<!-- انتخاب رندوم -->
+<div class="card">
+  <h3>🎲 انتخاب رندوم همکلاسی</h3>
+  <input id="names" type="text" placeholder="اسامی با ,">
+  <button onclick="pickRandom()">انتخاب</button>
+  <div id="randomRes"></div>
+</div>
+
+<!-- معدل گیر بدون واحد -->
+<div class="card">
+  <h3>🧮 معدل‌گیر سریع</h3>
+  <textarea id="grades" placeholder="نمره‌ها رو با کاما بنویس"></textarea>
+  <button onclick="calcAvg()">محاسبه معدل</button>
+  <div id="avgRes"></div>
+</div>
+
+<p>🚀 ساخته شده با ❤️ توسط علی سام</p>
+
+<script>
+// Splash screen
+setTimeout(()=>document.getElementById('splash').style.display='none', 2500);
+
+// حسابگر نمره
+function calcFinal(){
+  let t = parseFloat(document.getElementById("takalif").value)||0;
+  let q = parseFloat(document.getElementById("quiz").value)||0;
+  let e = parseFloat(document.getElementById("exam").value)||0;
+  let final = t*0.2 + q*0.3 + e*0.5;
+  document.getElementById("finalRes").innerText = final>=10?`🎉 پاس شدی! نمره نهایی: ${final.toFixed(2)}`:`😢 افتادی! نمره نهایی: ${final.toFixed(2)}`;
+}
+
+// تایمر
+let timerInterval;
+function startTimer(){
+  clearInterval(timerInterval);
+  let total = parseInt(document.getElementById("minutes").value)*60;
+  if(isNaN(total)||total<=0)return;
+  let display = document.getElementById("timerDisplay");
+  timerInterval=setInterval(()=>{
+    let m=Math.floor(total/60), s=total%60;
+    display.innerText=`⏳ ${m}:${s}`;
+    if(--total<0){
+      clearInterval(timerInterval);
+      display.innerText="🚨 وقت تموم شد!";
+      alert("⏰ زمان‌سنج تمام شد!");
+    }
+  },1000);
+}
+
+// انتخاب رندوم با ذخیره localStorage
+function pickRandom(){
+  let saved = localStorage.getItem("students");
+  let useSaved=false;
+  if(saved){
+    useSaved=confirm("میخواید از اسامی ذخیره شده استفاده کنید؟");
+  }
+  let students=[];
+  if(useSaved){
+    students = saved.split(",").map(s=>s.trim()).filter(s=>s);
+  }else{
+    let input = document.getElementById("names").value;
+    if(input) students = input.split(",").map(s=>s.trim()).filter(s=>s);
+    if(students.length>0 && confirm("میخواید ذخیره بشه برای دفعات بعد؟")){
+      localStorage.setItem("students", students.join(","));
+    }
+  }
+  if(students.length>0){
+    let choice = students[Math.floor(Math.random()*students.length)];
+    document.getElementById("randomRes").innerText="➡️ امروز قرعه افتاد به: "+choice+" 😅";
+  }else{
+    document.getElementById("randomRes").innerText="هیچ اسمی وارد نشده!";
+  }
+}
+
+// معدل گیر بدون واحد
+function calcAvg(){
+  let grades=document.getElementById("grades").value.split(",").map(x=>parseFloat(x)||0);
+  if(grades.length==0){
+    document.getElementById("avgRes").innerText="لطفاً نمره‌ها رو وارد کن!";
+    return;
+  }
+  let total=grades.reduce((a,b)=>a+b,0);
+  let avg = total/grades.length;
+  document.getElementById("avgRes").innerText="➡️ معدل شما: "+avg.toFixed(2);
+}
+</script>
+</body>
+</html>
